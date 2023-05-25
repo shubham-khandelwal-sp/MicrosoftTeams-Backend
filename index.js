@@ -1,6 +1,5 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const {v4 : uuidv4} = require('uuid')
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -17,6 +16,13 @@ app.use(
   })
 );
 
+/*
+   Defined endpoint routes:
+   /getAllUsers [GET]: This will fetch all the users 
+   /getUserMessages/:id [GET]: This will fetch all the messages of a particular user
+   /addMessage/:userId [PUT]: This is for adding a message 
+*/
+
 // fetch all the users 
 app.get("/getAllUsers", (req, res) => {
     const file = fs.readFileSync("./Database/users.json", {
@@ -26,7 +32,7 @@ app.get("/getAllUsers", (req, res) => {
     const userData = JSON.parse(file);
   
     if (userData) res.send(userData);
-    res.send(new Error("User not found"));
+    res.send(new Error("User file is not present"));
   });
 
 
@@ -46,8 +52,8 @@ app.get("/getUserMessages/:id", (req, res) => {
   res.send(new Error("User not found"));
 });
 
-// Add message to list
 
+// Add message to list
 app.put("/addMessage/:userId", (req, res) => {
 
     let userMessages = fs.readFileSync("./Database/userMessages.json", {
