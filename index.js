@@ -61,21 +61,40 @@ app.put("/addMessage/:userId", (req, res) => {
         flag: "r",
     });
 
+    let chatDetails = fs.readFileSync("./Database/users.json", {
+      encoding: "utf8",
+      flag: "r"
+    })
+
     //data of post request
     const data = req.body;
 
     const userMessagesData = JSON.parse(userMessages)
+    const chatDetailsData = JSON.parse(chatDetails)
+    
     const currentUserMessages = userMessagesData.find((userMessage) => {
         return userMessage.id === req.params.userId
     })
     currentUserMessages.messages.push(data)
+
+    const currentUserChatDetails = chatDetailsData.find((chatDetail) => {
+      return chatDetail.id === req.params.userId
+    })
+    currentUserChatDetails.lastModified = data.timing;
+    currentUserChatDetails.lastMessage = (data.sender?"":"You: ")+ data.message
+
+    chatDetails = chatDetailsData.map((chatDetail)=> {
+        if(chatDetail.id === req.params.userId) return currentUserChatDetails
+        return chatDetail
+    })
 
     userMessages = userMessagesData.map((userMessage)=> {
         if(userMessage.id === req.params.userId) return currentUserMessages
         return userMessage
     })
 
-    fs.writeFileSync("./database/userMessages.json", JSON.stringify(userMessages));
+    fs.writeFileSync("./Database/userMessages.json", JSON.stringify(userMessages));
+    fs.writeFileSync("./Database/users.json",JSON.stringify(chatDetails))
     res.json(data);
 
 });
